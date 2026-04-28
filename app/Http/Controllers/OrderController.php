@@ -14,7 +14,7 @@ class OrderController extends Controller
 {
     public function confirm()
     {
-        $userId = 1;
+        $userId = auth()->id();
         $cart = Cart::where('user_id', $userId)->first();
         $items = [];
         if ($cart) {
@@ -25,7 +25,7 @@ class OrderController extends Controller
 
     public function complete()
     {
-        $userId = 1;
+        $userId = auth()->id();
         $cart = Cart::where('user_id', $userId)->first();
         if (!$cart) {
             return redirect('/cart');

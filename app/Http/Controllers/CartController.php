@@ -11,7 +11,7 @@ class CartController extends Controller
 {
     public function index()
     {
-        $userId = 1;
+        $userId = auth()->id();
         $cart = Cart::where('user_id', $userId)->first();
         $items = [];
         if ($cart) {
@@ -22,7 +22,7 @@ class CartController extends Controller
 
     public function add(Request $request)
     {
-        $userId = 1; // 仮（後で認証に置き換える）
+        $userId = auth()->id();
 
         $cart = Cart::firstOrCreate([
             'user_id' => $userId

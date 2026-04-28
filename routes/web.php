@@ -1,32 +1,61 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-// 商品一覧
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// 商品一覧（トップ）
 Route::get('/', [ProductController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
-// カート
-Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index']);
-Route::post('/cart/add', [\App\Http\Controllers\CartController::class, 'add']);
-Route::post('/cart/update', [\App\Http\Controllers\CartController::class, 'update']);
-Route::post('/cart/delete', [\App\Http\Controllers\CartController::class, 'delete']);
+// 管理画面（admin制御）
+Route::middleware('admin')->group(function () {
+    Route::get('/admin/products', [AdminProductController::class, 'index']);
+    Route::get('/admin/products/create', [AdminProductController::class, 'create']);
+    Route::post('/admin/products', [AdminProductController::class, 'store']);
+    Route::get('/admin/products/{id}/edit', [AdminProductController::class, 'edit']);
+    Route::post('/admin/products/{id}', [AdminProductController::class, 'update']);
+    Route::post('/admin/products/{id}/delete', [AdminProductController::class, 'delete']);
 
-// 購入画面
-Route::get('/order/confirm', [\App\Http\Controllers\OrderController::class, 'confirm']);
-Route::post('/order/complete', [\App\Http\Controllers\OrderController::class, 'complete']);
+    Route::get('/admin/orders', [AdminOrderController::class, 'index']);
+});
 
+// 認証必須
+Route::middleware('auth')->group(function () {
 
-// 管理画面_商品登録
-Route::get('/admin/products', [AdminProductController::class, 'index']);
-Route::get('/admin/products/create', [AdminProductController::class, 'create']);
-Route::post('/admin/products', [AdminProductController::class, 'store']);
-Route::get('/admin/products/{id}/edit', [AdminProductController::class, 'edit']);
-Route::post('/admin/products/{id}', [AdminProductController::class, 'update']);
-Route::post('/admin/products/{id}/delete', [AdminProductController::class, 'delete']);
+    // カート
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::post('/cart/update', [CartController::class, 'update']);
+    Route::post('/cart/delete', [CartController::class, 'delete']);
 
-// 管理画面_注文一覧
-Route::get('/admin/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index']);
+    // 注文
+    Route::get('/order/confirm', [OrderController::class, 'confirm']);
+    Route::post('/order/complete', [OrderController::class, 'complete']);
+});
+
+// Breezeデフォルト
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+// プロフィール
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
